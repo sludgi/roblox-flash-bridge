@@ -1,19 +1,18 @@
 const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 10000;
+app.use(express.json()); // Allows the server to read data from Roblox
 
+// This handles the "GetAsync" (The Connection Lost error)
 app.get('/list-games', (req, res) => {
-res.json({
-message: "Ecosystem is Live!",
-categories: ["Action", "Test"],
-games: [{ name: "Test Game", path: "test/game.swf" }]
-});
+    res.json({ status: "Success", message: "Bridge is active" });
 });
 
-app.get('/', (req, res) => {
-res.send("Bridge is Online.");
+// This handles the "PostAsync" (The 404 error)
+app.post('/list-games', (req, res) => {
+    console.log("Data received from Roblox:", req.body);
+    res.json({ status: "Accepted", received: req.body });
 });
 
-app.listen(PORT, () => {
-console.log("Server running");
+app.listen(process.env.PORT || 10000, () => {
+    console.log("Server is running");
 });
