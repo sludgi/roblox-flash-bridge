@@ -1,23 +1,30 @@
 const express = require('express');
+const path = require('path');
 const app = express();
+const port = process.env.PORT || 10000;
+
 app.use(express.json());
 
-let flashData = { score: 0, status: "idle", lastPlayer: "none" };
+// This is the "Brain" variable that holds the Roblox data
+let robloxData = { score: 0 };
 
-// Roblox calls this to SEE what the Flash game is doing
-app.get('/flash-bridge', (req, res) => {
-    res.json(flashData);
+// 1. This tells the server to show your 'index.html' when you visit the link
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Roblox calls this to CHANGE what the Flash game should do
+// 2. This is the "Bridge" where Roblox sends data
 app.post('/flash-bridge', (req, res) => {
-    flashData = {
-        score: req.body.score || flashData.score,
-        status: req.body.status || flashData.status,
-        lastPlayer: req.body.user || "Unknown"
-    };
-    console.log("Updated Flash State:", flashData);
-    res.json({ success: true, newState: flashData });
+    robloxData = req.body;
+    console.log("Data received from Roblox:", robloxData);
+    res.sendStatus(200);
 });
 
-app.listen(process.env.PORT || 10000);
+// 3. This is where the Flash game asks for the data
+app.get('/flash-bridge', (req, res) => {
+    res.json(robloxData);
+});
+
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
